@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <meta description="Login session" content="where you login">
+    <link rel="stylesheet" href="/static/login.css">
+</head>
+
+<body>
+    <div class="grouped-up">
+        <h1 id="title">Login!</h1>
+        <center>
+            <div>
+                <form action="/login" method="POST" novalidate>
+                    {{ form.csrf_token }}
+                    {{ form.username(placeholder="Enter your username", class_="form") }}
+                    {%for err_form in form.username.errors %}
+                        <label for="" class="err_message">{{ err_form }}</label>
+                    {% endfor %}
+                    {{ form.password(placeholder="Enter your password", class_="form") }}
+                    {%for err_form in form.password.errors %}
+                        <label for="" class="err_message">{{ err_form }}</label>
+                    {% endfor %}
+                    <div class="remember">
+                    </div>
+                    <div>
+                        {% if err_db %}
+                        <label for="" class="err_message">{{ err_db }}</label>
+                        {% endif %}
+                    </div>
+                    <div class="remember">
+                        <label for="" class="">Remember me</label>
+                        {{ form.remember() }}
+                    </div>
+                    <div class="btns">
+                        <button id="ok_btn" type="submit">Login</button>
+                        <button id="no_btn" onclick="window.location = '/'" type="button">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </center>
+        <label for="" class="member">Not a member yet? <a href="/create-account">Create an account</a></label>
+    </div>
+</body>
+
+</html>

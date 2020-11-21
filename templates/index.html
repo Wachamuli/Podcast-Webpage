@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Podcast</title>
+    <link rel="stylesheet" href="/static/main.css">
+</head>
+
+<body>
+    <header>
+        <h1>Podcast</h1>
+
+        <div>
+            <button type="button" onclick="window.location = '/login'">Login</button>
+            <button type="button" onclick="window.location = '/create-account'">Create Account</button>
+        </div>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {%for message in messages %}
+                <h2>{{ message }}</h2>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="/trends">Trends</a></li>
+            <li><a href="/suscriptions">Suscriptions</a></li>
+            <li><a href="/explore">Explore</a></li>
+            <li><a href="/upload">Upload</a></li>
+        </ul>
+    </nav>
+
+    <section>
+
+    </section>
+</body>
+
+</html>

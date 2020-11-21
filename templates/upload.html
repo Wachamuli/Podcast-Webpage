@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload</title>
+</head>
+<body>
+    <header>
+        <h1>Upload your Podcast</h1>
+    </header>
+
+    <section>
+        <div>
+            <form action="/upload" method="POST" enctype="multipart/form-data" novalidate>
+                {{ form.csrf_token }}
+                {{ form.title }}
+                {% for err in form.title.errors %}
+                <label for="" class="err_message">{{ err }}</label>
+                {% endfor %}
+
+                <label for="">A thumbnail</label>
+                {{ form.image }}
+
+                <label for="">Podcast</label>
+                {{ form.mp3 }}
+                {% for err in form.mp3.errors %}
+                <label for="" class="err_message">{{err}}</label>
+                {% endfor %}
+
+                {{ form.description }}
+                <input type="submit" value="Upload">
+
+            </form>
+        </div>
+    </section>
+</body>
+</html>

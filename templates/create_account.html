@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="/static/create_account.css">
+</head>
+
+<body>
+    <div class="grouped-up">
+        <h1 id="title">Create an account!</h1>
+        <center>
+            <div>
+                <form action="/create-account" method="POST" novalidate>
+                    {{ form.csrf_token }}
+                    <div>
+                        {{ form.email(placeholder="Enter your email") }}
+                        {%for err in form.email.errors %}
+                        <label for="" class="err_message">{{ err }}</label>
+                        {% endfor%}
+                        {% if err_email %}
+                        <label for="" class="err_message">{{ err_email }}</label>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {{ form.username(placeholder="Enter your username") }}
+                        {%for err_form in form.username.errors %}
+                        <label for="" class="err_message">{{ err_form }}</label>
+                        {% endfor%}
+                        {% if err_usr %}
+                        <label for="" class="err_message">{{ err_usr }}</label>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {{ form.password(placeholder="Create a password") }}
+                        {{ form.confirm_password(placeholder="Confirm your pasword") }}
+                        {%for err_form in form.password.errors %}
+                        <label for="" class="err_message">{{ err_form }}</label>
+                        {% endfor%}
+                    </div>
+                    <div class="btns">
+                        <button id="ok_btn" type="submit">Create</button>
+                        <button id="no_btn" onclick="window.location = '/'" type="button">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </center>
+        <label for="" class="already_account">You already have an account? <a href="/login">Login</a></label>
+    </div>
+</body>
+
+</html>
