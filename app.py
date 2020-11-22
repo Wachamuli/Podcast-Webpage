@@ -11,7 +11,6 @@ from bcrypt import hashpw, gensalt, checkpw
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'b$2b$12$3MUJHIrPW2tS5o3LdjYme'
-app.config['UPLOAD_FOLDER'] = '/home/wachadev/Programming/Python/Podcast-Webpage/uploads'
 
 db = SessionLocal()
 init_db()
@@ -119,25 +118,35 @@ def login():
     return render_template('login.html', form = form, err_db = err_db)
 
 # TODO:
-from werkzeug.utils import secure_filename
 import os
+from werkzeug.utils import secure_filename
+
+app.config['UPLOAD_FOLDER'] = '/home/wachadev/Programming/Python/Pd_wepage/Podcast-Webpage/uploads'
+IMAGE_ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg', 'gif' }
+AUDIO_ALLOWED_EXTENSIONS = { 'mp3', 'wav', 'ogg', 'oga', 'flac' }
+
+def allowed_file(filename, allowed_extensions):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
 @app.route('/upload', methods = ['GET', 'POST'])
 def upload():
     form = UploadPodcast()
+    err_image = None
 
-    if form.validate_on_submit():
+    if not form.validate_on_submit():
         title = form.title.data
         image = form.image.data
         mp3 = form.image.data
         description = form.description.data
-        
-        # filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], mp3))
-        print(f'The file is: {file.filename}')
-        return 'Saved file!'
 
-    return render_template('upload.html', form = form)
+        if image and allowed_file(image.filename, IMAGE_ALLOWED_EXTENSIONS):
+            image_name = secure_filename(image.filename)
+            image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_name))
+            return 'Saved file!'
+
+        err_image = 'Format not allowed'
+
+    return render_template('upload.html', form = form, err_image = err_image)
 
         
 
