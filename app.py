@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, render_template, request, redirect, flash
 
 from flask_wtf import FlaskForm
@@ -5,12 +7,18 @@ from wtforms import StringField, PasswordField, BooleanField, FileField, TextAre
 from wtforms.validators import InputRequired, Length, EqualTo, Email, Regexp, Optional
 
 from database import SessionLocal, init_db
-from models import Users
+from models import Users, Podcast
 
 from bcrypt import hashpw, gensalt, checkpw
 
+from werkzeug.utils import secure_filename
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'b$2b$12$3MUJHIrPW2tS5o3LdjYme'
+app.config['UPLOAD_IMAGE_FOLDER'] = '/home/wachadev/Programming/Python/Pd_wepage/Podcast-Webpage/uploads/images'
+app.config['UPLOAD_AUDIO_FOLDER'] = '/home/wachadev/Programming/Python/Pd_wepage/Podcast-Webpage/uploads/audio'
+
+DATABASE_EXCEPTION = 'Oh no! We\'re having problems from the server-side'
 
 db = SessionLocal()
 init_db()
@@ -43,7 +51,7 @@ class LoginForm(FlaskForm):
 class UploadPodcast(FlaskForm):
     title = StringField('title', validators = [InputRequired('We need a title!')])
     image = FileField('image', validators = [Optional()])
-    mp3 = FileField('mp3', validators = [InputRequired('We need your podcast here!')])
+    audio = FileField('audio', validators = [InputRequired('We need your podcast here!')])
     description = TextAreaField('description', validators = [Optional()])
 
 
@@ -86,7 +94,7 @@ def create_account():
                 return redirect('/login')
             except:
                 db.rollback()
-                return 'Oh no! We\'re having problems from the server-side'
+                return DATABASE_EXCEPTION
             finally:
                 db.commit()
         
@@ -117,11 +125,7 @@ def login():
 
     return render_template('login.html', form = form, err_db = err_db)
 
-# TODO:
-import os
-from werkzeug.utils import secure_filename
 
-app.config['UPLOAD_FOLDER'] = '/home/wachadev/Programming/Python/Pd_wepage/Podcast-Webpage/uploads'
 IMAGE_ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg', 'gif' }
 AUDIO_ALLOWED_EXTENSIONS = { 'mp3', 'wav', 'ogg', 'oga', 'flac' }
 
@@ -132,21 +136,48 @@ def allowed_file(filename, allowed_extensions):
 def upload():
     form = UploadPodcast()
     err_image = None
-
-    if not form.validate_on_submit():
+    err_audio = None
+    img_folder = app.config['UPLOAD_IMAGE_FOLDER']
+    audio_folder = app.config['UPLOAD_AUDIO_FOLDER']
+    
+    if form.validate_on_submit():
         title = form.title.data
         image = form.image.data
-        mp3 = form.image.data
+        audio = form.audio.data
         description = form.description.data
 
-        if image and allowed_file(image.filename, IMAGE_ALLOWED_EXTENSIONS):
+        if not allowed_file(image.filename, IMAGE_ALLOWED_EXTENSIONS):
+            err_image = 'Invalid image format, use ' + ', '.join(IMAGE_ALLOWED_EXTENSIONS) + ' instead.'
+        elif not allowed_file(audio.filename, AUDIO_ALLOWED_EXTENSIONS):
+            err_audio = 'Invalid audio format, use ' + ', '.join(AUDIO_ALLOWED_EXTENSIONS) + ' instead.'
+        else:
             image_name = secure_filename(image.filename)
-            image.save(os.path.join(app.config['UPLOAD_FOLDER'], image_name))
-            return 'Saved file!'
+            img_path = os.path.join(img_folder, image_name)
+            image.save(img_path)
 
-        err_image = 'Format not allowed'
+            audio_name = secure_filename(audio.filename)
+            audio_path = os.path.join(audio_folder, audio_name)
+            audio.save(audio_path)
 
-    return render_template('upload.html', form = form, err_image = err_image)
+            new_podcast = Podcast(
+                title = title,
+                image = img_path,
+                audio = audio_path,
+                description = description,
+            )
+
+            try:
+                db.add(new_podcast)
+                db.commit()
+                flash('Uploaded')
+                return redirect('/')
+            except:
+                db.rollback()
+                return DATABASE_EXCEPTION
+            finally:
+                db.commit()
+
+    return render_template('upload.html', form = form, err_image = err_image, err_audio = err_audio)
 
         
 

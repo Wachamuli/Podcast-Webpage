@@ -14,6 +14,7 @@
         <div>
             <form action="/upload" method="POST" enctype="multipart/form-data" novalidate>
                 {{ form.csrf_token }}
+
                 {{ form.title }}
                 {% for err in form.title.errors %}
                 <label for="" class="err_message">{{ err }}</label>
@@ -21,14 +22,20 @@
 
                 <label for="">A thumbnail</label>
                 {{ form.image }}
+                {% if err_image %}
+                <label for="" class="err_message">{{ err_image }}</label>
+                {% endif %}
 
                 <label for="">Podcast</label>
-                {{ form.mp3 }}
-                {% for err in form.mp3.errors %}
-                <label for="" class="err_message">{{err}}</label>
+                {{ form.audio }}
+                {% for err in form.audio.errors %}
+                <label for="" class="err_message">{{ err }}</label>
                 {% endfor %}
-
+                {% if err_audio %}
+                <label for="" class="err_message"> {{ err_audio }}</label>
+                {% endif %}
                 {{ form.description }}
+                
                 <input type="submit" value="Upload">
 
             </form>
