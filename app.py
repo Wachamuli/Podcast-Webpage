@@ -27,7 +27,7 @@ class CreateAccount(FlaskForm):
     email = StringField('email', validators = [
     InputRequired('This field is required.'), 
     Email('Invalid e-mail.'), 
-    Regexp('[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$', 0, 'Write your e-mail address with a format someone@example.com.')
+    Regexp(r'[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$', 0, 'Write your e-mail address with a format someone@example.com.')
     ])
 
     username = StringField('usrname',validators = [
@@ -38,7 +38,7 @@ class CreateAccount(FlaskForm):
     password = PasswordField('psw',validators = [
     InputRequired('This field is required.'), 
     EqualTo('confirm_password', 'Password must match.'), 
-    Regexp('(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}', 0, 'Must contain at least one  number and one uppercase and lowercase letter, and at least be between 8 and 16 characters.')
+    Regexp(r'(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}', 0, 'Must contain at least one  number and one uppercase and lowercase letter, and at least be between 8 and 16 characters.')
     ])
 
     confirm_password = PasswordField('confirm_psw',validators = [InputRequired('This field is required.')])
@@ -70,7 +70,6 @@ def create_account():
         email = form.email.data
         usrname = form.username.data
         psw = form.password.data
-        confirm_psw = form.confirm_password.data
 
         usrname_exists = bool(db.query(Users.id).filter_by(username = usrname).scalar())
         email_exists = bool(db.query(Users.id).filter_by(e_mail = email).scalar())
