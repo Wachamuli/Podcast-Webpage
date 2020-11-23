@@ -1,17 +1,15 @@
 import os
+from jinja2 import TemplateNotFound
 
-from flask import Flask, render_template, request, redirect, flash
-
+from flask import Flask, render_template, request, redirect, flash, abort
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, FileField, TextAreaField
 from wtforms.validators import InputRequired, Length, EqualTo, Email, Regexp, Optional
+from bcrypt import hashpw, gensalt, checkpw
+from werkzeug.utils import secure_filename
 
 from database import SessionLocal, init_db
 from models import Users, Podcast
-
-from bcrypt import hashpw, gensalt, checkpw
-
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'b$2b$12$3MUJHIrPW2tS5o3LdjYme'
@@ -19,6 +17,9 @@ app.config['UPLOAD_IMAGE_FOLDER'] = '/home/wachadev/Programming/Python/Pd_wepage
 app.config['UPLOAD_AUDIO_FOLDER'] = '/home/wachadev/Programming/Python/Pd_wepage/Podcast-Webpage/uploads/audio'
 
 DATABASE_EXCEPTION = 'Oh no! We\'re having problems from the server-side'
+
+IMAGE_ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+AUDIO_ALLOWED_EXTENSIONS = {'mp3', 'wav', 'ogg', 'oga', 'flac'}
 
 db = SessionLocal()
 init_db()
@@ -38,7 +39,8 @@ class CreateAccount(FlaskForm):
     password = PasswordField('psw',validators = [
     InputRequired('This field is required.'), 
     EqualTo('confirm_password', 'Password must match.'), 
-    Regexp(r'(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}', 0, 'Must contain at least one  number and one uppercase and lowercase letter, and at least be between 8 and 16 characters.')
+    Regexp(r'(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}', 0, 'Must contain at least one  number and one \
+        uppercase and lowercase letter, and at least be between 8 and 16 characters.')
     ])
 
     confirm_password = PasswordField('confirm_psw',validators = [InputRequired('This field is required.')])
@@ -57,7 +59,10 @@ class UploadPodcast(FlaskForm):
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except TemplateNotFound:
+        abort(404)
 
 
 @app.route('/create-account', methods = ['GET', 'POST'])
@@ -96,8 +101,11 @@ def create_account():
                 return DATABASE_EXCEPTION
             finally:
                 db.commit()
-        
-    return render_template('create_account.html', form = form, err_email = err_email, err_usr = err_usr)
+
+    try: 
+        return render_template('create_account.html', form = form, err_email = err_email, err_usr = err_usr)
+    except TemplateNotFound:
+        abort(404)
             
         
 @app.route('/login', methods = ['GET', 'POST'])
@@ -122,11 +130,11 @@ def login():
         else:
             err_db = 'Invalid username'
 
-    return render_template('login.html', form = form, err_db = err_db)
+    try:
+        return render_template('login.html', form = form, err_db = err_db)
+    except TemplateNotFound:
+        abort(404)
 
-
-IMAGE_ALLOWED_EXTENSIONS = { 'png', 'jpg', 'jpeg', 'gif' }
-AUDIO_ALLOWED_EXTENSIONS = { 'mp3', 'wav', 'ogg', 'oga', 'flac' }
 
 def allowed_file(filename, allowed_extensions):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
@@ -176,13 +184,23 @@ def upload():
             finally:
                 db.commit()
 
-    return render_template('upload.html', form = form, err_image = err_image, err_audio = err_audio)
+    try:
+        return render_template('upload.html', form = form, err_image = err_image, err_audio = err_audio)
+    except:
+        abort(404)
 
         
+@app.route('/play-podcast')
+def play_podcast():
+    try:
+        return render_template('play_podcast.html')
+    except TemplateNotFound:
+        abort(404)
 
-# @app.errorhandler(404)
-# def not_found():
-#     pass
+
+@app.errorhandler(404)
+def not_found(e):
+    return 'Page not found', 404
 
 
 if __name__ == '__main__':
