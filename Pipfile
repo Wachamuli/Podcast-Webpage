@@ -14,7 +14,6 @@ bcrypt = "*"
 flask-wtf = "*"
 email-validator = "*"
 pylint-flask = "*"
-flake8 = "*"
 
 [requires]
 python_version = "3.8"

@@ -8,6 +8,7 @@ from wtforms.validators import InputRequired, Length, EqualTo, Email, Regexp, Op
 from bcrypt import hashpw, gensalt, checkpw
 from werkzeug.utils import secure_filename
 from jinja2 import TemplateNotFound
+from sqlalchemy import not_, and_, or_
 
 from database import SessionLocal, init_db
 from models import Users, Podcast
@@ -71,33 +72,6 @@ class UploadPodcastForm(FlaskForm):
 
 @app.route('/')
 def home():
-    MAX_PODCASTS_TO_DISPLAY = 3
-    a = []
-    for _ in range(0, MAX_PODCASTS_TO_DISPLAY):
-        available_pdst = session.query(Podcast).count()
-        r_id = random.randint(1, available_pdst)
-        
-        encountered_pdst = session.query(Podcast.id).filter_by(id=r_id).scalar()
-        if encountered_pdst in a:
-            MAX_PODCASTS_TO_DISPLAY += 1
-            print(a)
-        else:
-            pdst_data = session.query(Podcast).filter_by(id=encountered_pdst).first()
-
-            title = pdst_data.title
-            img = pdst_data.image
-            audio = pdst_data.audio
-            description = pdst_data.description 
-            print(
-                title + "\n",
-                img + "\n",
-                audio + "\n",
-                description + "\n"
-            )
-            a.append(encountered_pdst)
-            print(a)
-
-
     try:    
         return render_template('index.html')
     except TemplateNotFound:
@@ -227,14 +201,6 @@ def upload():
     except:
         abort(404)
 
-        
-@app.route('/play-podcast')
-def play_podcast():
-    try:
-        return render_template('play_podcast.html')
-    except TemplateNotFound:
-        abort(404)
-
 
 @app.errorhandler(404)
 def not_found(e):
@@ -242,4 +208,4 @@ def not_found(e):
 
 
 if __name__ == '__main__':
-    app.run(debug = True)
+    app.run(debug=True)
