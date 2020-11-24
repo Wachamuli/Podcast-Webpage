@@ -1,3 +1,9 @@
 {
-    "python.linting.enabled": false
+    "python.linting.enabled": true,
+    "python.pythonPath": "/home/wachadev/.local/share/virtualenvs/Podcast-Webpage-bu-QIkSw/bin/python",
+    "python.linting.pylintArgs": [
+        "--load-plugins",
+        "pylint-flask",
+        "pylint-sqlalchemy"
+    ]
 }
